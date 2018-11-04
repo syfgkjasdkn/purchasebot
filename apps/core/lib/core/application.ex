@@ -16,7 +16,9 @@ defmodule Core.Application do
           unquote(storage),
           {Registry, keys: :unique, name: Core.Group.Registry},
           Core.Group.Supervisor,
-          {Task, fn -> start_groups() end}
+          unless unquote(Mix.env() == :test) do
+            {Task, fn -> start_groups() end}
+          end
         ],
         &is_nil/1
       )

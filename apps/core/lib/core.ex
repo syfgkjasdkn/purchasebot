@@ -1,9 +1,10 @@
 defmodule Core do
   @moduledoc false
   alias Core.Group
+  require Group
 
   def add_group(group_id) when is_integer(group_id) do
-    :ok = Storage.insert_group(group_id)
+    Storage.insert_group(group_id)
     Group.Supervisor.start_group(group_id)
   end
 
@@ -23,8 +24,19 @@ defmodule Core do
     call_group(group_id, {:set_schedule, schedule})
   end
 
+  def set_message(group_id, message) do
+    call_group(group_id, {:set_message, message})
+  end
+
   def handle_text(group_id, text) do
     call_group(group_id, {:handle_text, text})
+  end
+
+  @doc false
+  def _group_state(group_id) do
+    group_id
+    |> call_group(:state)
+    |> Group.state()
   end
 
   defp call_group(group_id, message) when is_integer(group_id) do
