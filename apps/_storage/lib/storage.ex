@@ -55,13 +55,21 @@ defmodule Storage do
   def groups(pid \\ __MODULE__) do
     pid
     |> GenServer.call(:groups)
-    |> Enum.map(fn {telegram_id, message, schedule} ->
-      %Group{
-        telegram_id: telegram_id,
-        message: _maybe_nilify(message),
-        schedule: _maybe_nilify(schedule)
-      }
-    end)
+    |> Enum.map(&build_group/1)
+  end
+
+  defp build_group({telegram_id, message, schedule, last_repost}) do
+    last_repost =
+      if _maybe_nilify(last_repost) do
+        NaiveDateTime.from_iso8601!(last_repost)
+      end
+
+    %Group{
+      telegram_id: telegram_id,
+      message: _maybe_nilify(message),
+      schedule: _maybe_nilify(schedule),
+      last_repost: last_repost
+    }
   end
 
   defp _maybe_nilify(:undefined), do: nil
@@ -79,6 +87,22 @@ defmodule Storage do
     GenServer.call(pid, {:set_schedule, telegram_id, schedule})
   end
 
+  @spec set_last_repost(integer, NaiveDateTime.t()) :: :ok | other :: any
+  @spec set_last_repost(module | pid, integer, NaiveDateTime.t()) :: :ok | other :: any
+  def set_last_repost(pid \\ __MODULE__, telegram_id, datetime) do
+    last_repost = NaiveDateTime.to_iso8601(datetime)
+    GenServer.call(pid, {:set_last_repost, telegram_id, last_repost})
+  end
+
+  @spec group(integer) :: Group.t() | nil
+  @spec group(module | pid, integer) :: Group.t() | nil
+  def group(pid \\ __MODULE__, telegram_id) do
+    case GenServer.call(pid, {:group, telegram_id}) do
+      [row] -> build_group(row)
+      [] -> nil
+    end
+  end
+
   @doc false
   def handle_call(message, from, state)
 
@@ -89,9 +113,15 @@ defmodule Storage do
     {:reply, run(statement), state}
   end
 
-  @spec handle_call(:groups, GenServer.from(), state) :: {:reply, [tuple()], state}
+  def handle_call({:group, telegram_id}, _from, state) do
+    sql = "SELECT telegram_id, message, schedule, last_repost FROM groups WHERE telegram_id = ?"
+    {:ok, statement, state} = prepared_statement(sql, state)
+    :ok = :esqlite3.bind(statement, [telegram_id])
+    {:reply, :esqlite3.fetchall(statement), state}
+  end
+
   def handle_call(:groups, _from, state) do
-    sql = "SELECT telegram_id, message, schedule FROM groups"
+    sql = "SELECT telegram_id, message, schedule, last_repost FROM groups"
     {:ok, statement, state} = prepared_statement(sql, state)
     {:reply, :esqlite3.fetchall(statement), state}
   end
@@ -110,6 +140,13 @@ defmodule Storage do
     {:reply, run(statement), state}
   end
 
+  def handle_call({:set_last_repost, telegram_id, last_repost}, _from, state) do
+    sql = "UPDATE groups SET last_repost = ? WHERE telegram_id = ?"
+    {:ok, statement, state} = prepared_statement(sql, state)
+    :ok = :esqlite3.bind(statement, [last_repost, telegram_id])
+    {:reply, run(statement), state}
+  end
+
   def handle_call(:conn, _from, state(conn: conn) = state) do
     {:reply, conn, state}
   end
@@ -124,7 +161,8 @@ defmodule Storage do
     CREATE TABLE IF NOT EXISTS groups (
       telegram_id INTEGER PRIMARY KEY,
       schedule TEXT,
-      message TEXT
+      message TEXT,
+      last_repost DATETIME
     );
 
     COMMIT;

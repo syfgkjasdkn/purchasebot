@@ -11,10 +11,13 @@ defmodule StorageTest do
     telegram_id = -1_132_412_341_234_123
 
     assert Storage.groups(pid) == []
+    assert Storage.group(pid, telegram_id) == nil
 
     assert :ok = Storage.insert_group(pid, telegram_id)
 
-    assert Storage.groups(pid) == [%Group{telegram_id: telegram_id, message: nil, schedule: nil}]
+    assert Storage.groups(pid) == [
+             %Group{telegram_id: telegram_id, message: nil, schedule: nil, last_repost: nil}
+           ]
 
     message = """
     #autosell 13 Lambo for 13 TRX
@@ -28,17 +31,29 @@ defmodule StorageTest do
     assert {:error, {:constraint, 'UNIQUE constraint failed: groups.telegram_id'}} ==
              Storage.insert_group(pid, telegram_id)
 
-    assert [
-             %Group{telegram_id: ^telegram_id, message: ^message, schedule: nil}
-           ] = Storage.groups(pid)
+    assert %Group{telegram_id: ^telegram_id, message: ^message, schedule: nil, last_repost: nil} =
+             Storage.group(pid, telegram_id)
 
     schedule = "* * * 5"
 
     assert :ok = Storage.set_schedule(pid, telegram_id, schedule)
 
-    assert [
-             %Group{telegram_id: ^telegram_id, message: ^message, schedule: ^schedule}
-           ] = Storage.groups(pid)
+    assert %Group{
+             telegram_id: ^telegram_id,
+             message: ^message,
+             schedule: ^schedule,
+             last_repost: nil
+           } = Storage.group(pid, telegram_id)
+
+    last_repost = NaiveDateTime.utc_now()
+    assert :ok = Storage.set_last_repost(pid, telegram_id, last_repost)
+
+    assert %Group{
+             telegram_id: ^telegram_id,
+             message: ^message,
+             schedule: ^schedule,
+             last_repost: ^last_repost
+           } = Storage.group(pid, telegram_id)
   end
 
   test "multiple groups", %{pid: pid} do
