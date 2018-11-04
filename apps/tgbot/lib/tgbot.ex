@@ -21,7 +21,7 @@ defmodule TGBot do
 
   def handle(%{
         "message" => %{
-          "from" => %{"id" => telegram_id, "username" => username},
+          "from" => %{"id" => telegram_id},
           "chat" => %{"id" => chat_id, "type" => type},
           "text" => text
         }
@@ -34,14 +34,13 @@ defmodule TGBot do
 
   def handle(%{
         "message" => %{
-          "from" => %{"id" => telegram_id},
-          "chat" => %{"id" => telegram_id, "type" => "private"},
-          "text" => text
+          "chat" => %{"type" => "private"}
         }
       }) do
-    if Core.admin?(telegram_id) do
-      handle_private_text(text, telegram_id)
-    end
+    # if Core.admin?(telegram_id) do
+    #   handle_private_text(text, telegram_id)
+    # end
+    :ignore
   end
 
   def handle(other) do
@@ -49,35 +48,33 @@ defmodule TGBot do
   end
 
   defp handle_public_text("/message", chat_id) do
-    chat_id
-    |> Core.start_message()
-    |> maybe_reply(chat_id)
+    :ok = Core.start_message(chat_id)
+
+    @adapter.send_message(chat_id, """
+    👍 Started a new message editing session for the current group.
+    """)
   end
 
   defp handle_public_text("/save", chat_id) do
-    chat_id
-    |> Core.save_message()
-    |> maybe_reply(chat_id)
+    {:ok, message} = Core.save_message(chat_id)
+
+    @adapter.send_message(chat_id, """
+    👍 Saved the following message for the current group:
+
+    #{message}
+    """)
   end
 
   defp handle_public_text("/time " <> schedule, chat_id) do
-    chat_id
-    |> Core.set_schedule(schedule)
-    |> maybe_reply(chat_id)
+    :ok = Core.set_schedule(chat_id, schedule)
+
+    @adapter.send_message(chat_id, """
+    👍 Saved the new schedule.
+    """)
   end
 
   defp handle_public_text(text, chat_id) do
-    chat_id
-    |> Core.handle_text(text)
-    |> maybe_reply(chat_id)
-  end
-
-  defp maybe_reply({:reply, reply}, chat_id) do
-    @adapter.send_message(chat_id, reply)
-  end
-
-  defp maybe_reply(:noreply, _chat_id) do
-    :ignore
+    :ok = Core.handle_text(chat_id, text)
   end
 
   # @token Application.get_env(:tgbot, :token) || raise(":tgbot needs :token")
@@ -95,7 +92,13 @@ defmodule TGBot do
   end
 
   def bot_id do
-    @adapter.bot_id()
+    if bot_id = Application.get_env(:tgbot, :bot_id) do
+      bot_id
+    else
+      bot_id = @adapter.bot_id()
+      Application.put_env(:tgbot, :bot_id, bot_id)
+      bot_id
+    end
   end
 
   def set_webhook(url) do

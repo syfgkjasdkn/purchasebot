@@ -5,17 +5,12 @@ defmodule Core.Group do
   require Logger
   require Record
 
-  Record.defrecordp(:state, [:group_id, message_acc: []])
+  Record.defrecord(:state, [:group_id, message_acc: []])
 
   @doc false
   def start_link(opts) do
     group_id = opts[:group_id] || raise("need :group_id")
     GenServer.start_link(__MODULE__, opts, name: via(group_id))
-  end
-
-  @doc false
-  def _state(group_id) do
-    state(call(group_id, :state))
   end
 
   @doc false
@@ -41,7 +36,7 @@ defmodule Core.Group do
 
   def handle_call(:save_message, _from, state(group_id: group_id, message_acc: message) = state) do
     :ok = Storage.set_message(group_id, message)
-    {:reply, :ok, state(state, message_acc: [])}
+    {:reply, {:ok, message}, state(state, message_acc: [])}
   end
 
   def handle_call({:set_schedule, schedule}, _from, state(group_id: group_id) = state) do

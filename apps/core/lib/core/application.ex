@@ -31,7 +31,7 @@ defmodule Core.Application do
   end
 
   def start_groups do
-    Enum.each(Storage.groups(), fn %Storage.Group{group_id: group_id} ->
+    Enum.each(Storage.groups(), fn %Storage.Group{telegram_id: group_id} ->
       Core.Group.Supervisor.start_group(group_id)
     end)
   end
