@@ -63,15 +63,15 @@ defmodule TGBot do
     """)
   end
 
-  defp handle_public_text("/save", chat_id) do
-    {:ok, message} = Core.save_message(chat_id)
+  # defp handle_public_text("/save", chat_id) do
+  #   {:ok, message} = Core.save_message(chat_id)
 
-    @adapter.send_message(chat_id, """
-    👍 Saved the following message for the current group:
+  #   @adapter.send_message(chat_id, """
+  #   👍 Saved the following message for the current group:
 
-    #{message}
-    """)
-  end
+  #   #{message}
+  #   """)
+  # end
 
   defp handle_public_text("/time", chat_id) do
     @adapter.send_message(chat_id, """

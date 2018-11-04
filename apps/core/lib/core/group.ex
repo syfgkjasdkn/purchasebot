@@ -76,8 +76,6 @@ defmodule Core.Group do
       if raw_schedule do
         {:ok, schedule} = Schedule.parse(raw_schedule)
         schedule
-      else
-        raise("invalid schedule in db")
       end
 
     {:noreply, state(state, schedule: schedule)}
@@ -85,8 +83,12 @@ defmodule Core.Group do
 
   def handle_info(:maybe_publish, state(group_id: group_id, schedule: schedule) = state) do
     Process.send_after(self(), :maybe_publish, @sleep)
-    maybe_publish(schedule, Time.utc_now(), group_id)
-    {:noreply, state(state)}
+
+    if schedule do
+      maybe_publish(schedule, Time.utc_now(), group_id)
+    end
+
+    {:noreply, state}
   end
 
   def maybe_publish(
@@ -102,7 +104,7 @@ defmodule Core.Group do
         Enum.each(minutes, fn minute ->
           if minute - current_minute == 0 do
             %Storage.Group{message: message} = Storage.group(group_id)
-            Application.get_env(:core, :publisher).publish(group_id, message)
+            Application.get_env(:core, :publisher).send_message(group_id, message)
           end
         end)
       end
