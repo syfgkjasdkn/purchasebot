@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+set +e
+
+_build() {
+  if [ -z "$PURCHASEBOT_PROD_TG_TOKEN" ] ; then
+    echo "Need PURCHASEBOT_PROD_TG_TOKEN to be set"
+    exit 1
+  fi
+
+  docker build . \
+    --build-arg TG_BOT_TOKEN=${PURCHASEBOT_PROD_TG_TOKEN} \
+    -t purchasebot
+}
+
+case $1 in
+  build ) _build ;;
+esac
