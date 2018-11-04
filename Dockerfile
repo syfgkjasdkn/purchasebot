@@ -1,6 +1,6 @@
 # Build Stage
 
-FROM bitwalker/alpine-elixir:1.7.4 as builder
+FROM bitwalker/alpine-elixir:1.7.3 as builder
 
 ARG TG_BOT_TOKEN
 ENV PURCHASEBOT_PROD_TG_TOKEN=${TG_BOT_TOKEN}
@@ -26,7 +26,7 @@ RUN APP_NAME="purchasebot" && \
 
 # Deployment Stage
 
-FROM bitwalker/alpine-erlang:21.0.9
+FROM bitwalker/alpine-erlang:21.0.3
 
 EXPOSE 4000
 
