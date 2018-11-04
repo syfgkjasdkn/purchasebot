@@ -6,7 +6,9 @@ defmodule Core.Group do
   require Logger
   require Record
 
-  Record.defrecord(:state, [:group_id, :timer, :schedule, message_acc: []])
+  Record.defrecord(:state, [:group_id, :schedule])
+
+  @sleep 60 * 1000
 
   @doc false
   def start_link(opts) do
@@ -17,6 +19,7 @@ defmodule Core.Group do
   @doc false
   def init(opts) do
     send(self(), :init)
+    Process.send_after(self(), :maybe_publish, @sleep)
     {:ok, state(group_id: opts[:group_id])}
   end
 
@@ -28,27 +31,26 @@ defmodule Core.Group do
   @doc false
   def handle_call(message, from, state)
 
-  def handle_call({:handle_text, text}, _from, state(message_acc: message_acc) = state) do
-    {:reply, :ok, state(state, message_acc: [message_acc | text])}
-  end
+  # def handle_call({:handle_text, text}, _from, state(message_acc: message_acc) = state) do
+  #   {:reply, :ok, state(state, message_acc: [message_acc | text])}
+  # end
 
-  def handle_call(:start_message, _from, state) do
-    {:reply, :ok, state(state, message_acc: [])}
-  end
+  # def handle_call(:start_message, _from, state) do
+  #   {:reply, :ok, state(state, message_acc: [])}
+  # end
 
-  def handle_call(:save_message, _from, state(group_id: group_id, message_acc: message) = state) do
-    :ok = Storage.set_message(group_id, message)
-    {:reply, {:ok, message}, state(state, message_acc: [])}
-  end
+  # def handle_call(:save_message, _from, state(group_id: group_id, message_acc: message) = state) do
+  #   :ok = Storage.set_message(group_id, message)
+  #   {:reply, {:ok, message}, state(state, message_acc: [])}
+  # end
 
   def handle_call(
         {:set_schedule, raw_schedule},
         _from,
-        state(group_id: group_id, timer: timer) = state
+        state(group_id: group_id) = state
       ) do
     case Schedule.parse(raw_schedule) do
       {:ok, %Schedule{} = schedule} ->
-        :timer.cancel(timer)
         :ok = Storage.set_schedule(group_id, raw_schedule)
         {:reply, {:ok, Schedule.describe(schedule)}, state(state, schedule: schedule)}
 
@@ -74,8 +76,36 @@ defmodule Core.Group do
       if raw_schedule do
         {:ok, schedule} = Schedule.parse(raw_schedule)
         schedule
+      else
+        raise("invalid schedule in db")
       end
 
     {:noreply, state(state, schedule: schedule)}
+  end
+
+  def handle_info(:maybe_publish, state(group_id: group_id, schedule: schedule) = state) do
+    Process.send_after(self(), :maybe_publish, @sleep)
+    maybe_publish(schedule, Time.utc_now(), group_id)
+    {:noreply, state(state)}
+  end
+
+  def maybe_publish(
+        %Schedule{hours: hours, minutes: minutes},
+        %Time{
+          hour: current_hour,
+          minute: current_minute
+        },
+        group_id
+      ) do
+    Enum.each(hours, fn hour ->
+      if hour - current_hour == 0 do
+        Enum.each(minutes, fn minute ->
+          if minute - current_minute == 0 do
+            %Storage.Group{message: message} = Storage.group(group_id)
+            Application.get_env(:core, :publisher).publish(group_id, message)
+          end
+        end)
+      end
+    end)
   end
 end

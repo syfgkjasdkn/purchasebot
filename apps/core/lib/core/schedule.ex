@@ -46,6 +46,7 @@ defmodule Core.Schedule do
             throw(:error)
         end
       end)
+      |> Enum.uniq()
 
     {:ok, hours_or_minutes}
   catch

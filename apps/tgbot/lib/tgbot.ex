@@ -21,13 +21,13 @@ defmodule TGBot do
 
   def handle(%{
         "message" => %{
-          "from" => %{"id" => telegram_id},
+          "from" => %{"id" => from_id},
           "chat" => %{"id" => chat_id, "type" => type},
           "text" => text
         }
       })
       when type in ["group", "supergroup", "channel"] do
-    if Core.admin?(telegram_id) do
+    if Core.admin?(from_id) do
       handle_public_text(text, chat_id)
     end
   end
@@ -47,11 +47,19 @@ defmodule TGBot do
     Logger.error("unhandled request:\n\n#{inspect(other)}")
   end
 
-  defp handle_public_text("/message", chat_id) do
-    :ok = Core.start_message(chat_id)
+  defp handle_public_text("/message " <> message, chat_id) do
+    # :ok = Core.start_message(chat_id)
+
+    :ok = Core.set_message(chat_id, message)
+
+    # @adapter.send_message(chat_id, """
+    # 👍 Started a new message editing session for the current group.
+    # """)
 
     @adapter.send_message(chat_id, """
-    👍 Started a new message editing session for the current group.
+    👍 Saved the following message for the current group:
+
+    #{message}
     """)
   end
 
@@ -65,16 +73,50 @@ defmodule TGBot do
     """)
   end
 
-  defp handle_public_text("/time " <> schedule, chat_id) do
-    :ok = Core.set_schedule(chat_id, schedule)
-
+  defp handle_public_text("/time", chat_id) do
     @adapter.send_message(chat_id, """
-    👍 Saved the new schedule.
+    Provide the minutes at hours (UTC) when the message needs to be reposted.
+    Format: /time <hours> <minutes>
+
+    Example:
+
+    /time 0,6,12,18 0
+
+    Would repost the message at:
+
+    00:00
+    06:00
+    12:00
+    18:00
+
+    Other valid examples:
+
+    /time 0 0
+    /time 0,12 0,30
     """)
   end
 
-  defp handle_public_text(text, chat_id) do
-    :ok = Core.handle_text(chat_id, text)
+  defp handle_public_text("/time " <> schedule, chat_id) do
+    case Core.set_schedule(chat_id, String.trim(schedule)) do
+      {:ok, description} ->
+        @adapter.send_message(chat_id, """
+        👍 Saved the new schedule.
+
+        The messages will be sent at (UTC):
+
+        #{description}
+        """)
+
+      {:error, :invalid_format} ->
+        @adapter.send_message(chat_id, """
+        🚨 Couldn't parse the schedule
+        """)
+    end
+  end
+
+  defp handle_public_text(_text, _chat_id) do
+    # :ok = Core.handle_text(chat_id, text)
+    :ignore
   end
 
   # @token Application.get_env(:tgbot, :token) || raise(":tgbot needs :token")
