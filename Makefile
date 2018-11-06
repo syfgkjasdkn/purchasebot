@@ -6,4 +6,4 @@ help:
 
 # target: build - Builds a docker container
 build:
-	PLATFORM=ubuntu bin/release build
+	bin/release build

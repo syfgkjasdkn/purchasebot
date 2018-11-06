@@ -2,11 +2,8 @@ use Mix.Config
 
 adapter =
   case Mix.env() do
-    :test ->
-      TGBot.TestAdapter
-
-    env when env in [:dev, :prod] ->
-      TGBot.NadiaAdapter
+    :test -> TGBot.TestAdapter
+    env when env in [:dev, :prod] -> TGBot.NadiaAdapter
   end
 
 token =
@@ -14,8 +11,9 @@ token =
     :test ->
       "1263745172:iugyaksdfhjfgrgyuwekfhjsdb"
 
+    # in prod it's loaded from TG_TOKEN env var at runtime
     :prod ->
-      System.get_env("PURCHASEBOT_PROD_TG_TOKEN") || raise("need PURCHASEBOT_PROD_TG_TOKEN")
+      nil
 
     :dev ->
       if adapter == TGBot.NadiaAdapter do

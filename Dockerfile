@@ -2,9 +2,6 @@
 
 FROM bitwalker/alpine-elixir:1.7.3 as builder
 
-ARG TG_BOT_TOKEN
-ENV PURCHASEBOT_PROD_TG_TOKEN=${TG_BOT_TOKEN}
-
 COPY rel ./rel
 COPY config ./config
 COPY apps ./apps
@@ -30,9 +27,7 @@ FROM bitwalker/alpine-erlang:21.0.3
 
 EXPOSE 4000
 
-# TODO DB_PATH needs to point to a mounted volume
 ENV REPLACE_OS_VARS=true \
-    DB_PATH="/opt/app/db.sqlite3" \
     PORT=4000
 
 COPY --from=builder /export/ .
