@@ -9,7 +9,7 @@ defmodule Core do
   end
 
   def admin?(user_id) do
-    user_id in [113_011]
+    user_id in Application.get_env(:core, :admins)
   end
 
   def start_message(group_id) do
