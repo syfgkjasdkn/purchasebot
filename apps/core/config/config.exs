@@ -2,8 +2,11 @@ use Mix.Config
 
 db_path =
   case Mix.env() do
+    # tmp database is created
     :dev -> ""
-    :prod -> ""
+    # in prod it is loaded from DB_PATH env var at runtime
+    :prod -> nil
+    # in test the database is started manually for each test run
     :test -> nil
   end
 

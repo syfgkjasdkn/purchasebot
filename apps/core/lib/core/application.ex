@@ -11,6 +11,7 @@ defmodule Core.Application do
 
   def start(_type, _args) do
     load_admins!()
+    load_db_path!()
 
     children =
       Enum.reject(
@@ -49,6 +50,11 @@ defmodule Core.Application do
       end)
 
     Application.put_env(:core, :admins, admins)
+  end
+
+  def load_db_path! do
+    db_path = System.get_env("DB_PATH") || raise(ArgumentError, "need DB_PATH to be set")
+    Application.put_env(:core, :db_path, db_path)
   end
 
   def start_groups do
