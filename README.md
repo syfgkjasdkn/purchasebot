@@ -21,7 +21,7 @@ docker run purchasebot \
   -e ADMIN_IDS=1726345,1723654,2435 \
   -e TG_TOKEN=17623456:euygafkjsdhfasdf \
   -e DB_PATH=/opt/app/db.sqlite3 \
-  -p 4000:80
+  -p 80:4000
 ```
 
 But you'd probably want to use some kind of container orchestrator like [docker compose](https://docs.docker.com/compose/) or maybe even [kubernetes](https://kubernetes.io/) instead.
