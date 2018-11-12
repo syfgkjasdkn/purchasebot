@@ -1,0 +1,19 @@
+version: "3"
+services:
+  dicebot:
+    restart: always
+    # image: <point to the image (instead of the next line)>
+    build: .
+    expose:
+      - "4000"
+    ports:
+      - "4000:4000"
+    volumes:
+       - purchasebot.sqlite3:/opt/app/db.sqlite3
+    environment:
+      - ADMIN_IDS=<...>
+      - TG_TOKEN=<...>
+      - WEB_PORT=4000
+      - DB_PATH=/opt/app/db.sqlite3
+volumes:
+  purchasebot.sqlite3:

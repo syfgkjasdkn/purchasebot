@@ -17,4 +17,10 @@ end
 config :core,
   db_path: env!.("DB_PATH", :string)
 
-config :web, Web.Endpoint, http: [:inet6, port: env!.("PORT", :integer)]
+config :web, Web.Endpoint,
+  https: [
+    :inet6,
+    port: env!.("WEB_PORT", :integer),
+    keyfile: "priv/server.key",
+    certfile: "priv/server.pem"
+  ]

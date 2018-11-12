@@ -25,10 +25,8 @@ RUN APP_NAME="purchasebot" && \
 
 FROM bitwalker/alpine-erlang:21.0.3
 
-EXPOSE 4000
-
-ENV REPLACE_OS_VARS=true \
-    PORT=4000
+# EXPOSE 4000
+# ENV REPLACE_OS_VARS=true
 
 COPY --from=builder /export/ .
 
