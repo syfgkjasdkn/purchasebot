@@ -14,6 +14,7 @@ services:
       - ADMIN_IDS=<...>
       - TG_TOKEN=<...>
       - WEB_PORT=4000
+      - PUBLIC_IP=8.8.8.8
       - DB_PATH=/opt/app/db.sqlite3
 volumes:
   purchasebot.sqlite3:

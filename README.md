@@ -22,6 +22,7 @@ docker run purchasebot \
   -e ADMIN_IDS=1726345,1723654,2435 \
   -e TG_TOKEN=17623456:euygafkjsdhfasdf \
   -e WEB_PORT=51762 \
+  -e PUBLIC_IP=8.8.8.8 \
   -e DB_PATH=/opt/app/db.sqlite3 \
   -p 51762:51762
 ```
