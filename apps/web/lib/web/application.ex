@@ -24,18 +24,13 @@ defmodule Web.Application do
 
   @doc false
   def set_webhook! do
-    addr = _addr!()
-    port = :ranch.get_port(Web.Endpoint.HTTPS) || raise("failed to get https port")
-    url = "https://#{addr}:#{port}/tgbot"
-    {:ok, _} = TGBot.set_webhook(url)
-    Logger.info("set webhook to #{url}")
-  end
-
-  defp _addr! do
-    {:ok, [{addr, _, _} | _rest]} = :inet.getif()
-
-    addr
-    |> :inet.ntoa()
-    |> to_string()
+    if public_ip = System.get_env("PUBLIC_IP") do
+      port = :ranch.get_port(Web.Endpoint.HTTPS) || raise("failed to get https port")
+      url = "https://#{addr}:#{port}/tgbot"
+      {:ok, _} = TGBot.set_webhook(url)
+      Logger.info("set webhook to #{url}")
+    else
+      Logger.error("couldn't find PUBLIC_IP env var, skipping webhook setup")
+    end
   end
 end
