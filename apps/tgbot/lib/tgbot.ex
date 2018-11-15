@@ -120,7 +120,7 @@ defmodule TGBot do
   end
 
   # @token Application.get_env(:tgbot, :token) || raise(":tgbot needs :token")
-  Application.get_env(:tgbot, :token) || raise(":tgbot needs :token")
+  # Application.get_env(:tgbot, :token) || raise(":tgbot needs :token")
 
   @spec token :: String.t()
   def token do
