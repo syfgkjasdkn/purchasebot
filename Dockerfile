@@ -9,7 +9,7 @@ COPY mix.exs .
 COPY mix.lock .
 
 RUN apk update && \
-    apk --no-cache --update add make g++ \
+    apk --no-cache --update add make g++ && \
     rm -rf /var/cache/apk/*
 
 RUN export MIX_ENV=prod && \
