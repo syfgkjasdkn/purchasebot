@@ -4,6 +4,9 @@ defmodule TGBot.Application do
 
   def start(_type, _args) do
     load_tg_token!()
+
+    opts = [strategy: :one_for_one, name: TGBot.Supervisor]
+    Supervisor.start_link([], opts)
   end
 
   @doc false
