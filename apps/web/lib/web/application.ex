@@ -26,7 +26,7 @@ defmodule Web.Application do
   def maybe_set_webhook do
     if public_ip = System.get_env("PUBLIC_IP") do
       port = :ranch.get_port(Web.Endpoint.HTTPS) || raise("failed to get https port")
-      url = "https://#{addr}:#{port}/tgbot"
+      url = "https://#{public_ip}:#{port}/tgbot"
       {:ok, _} = TGBot.set_webhook(url)
       Logger.info("set webhook to #{url}")
     else
