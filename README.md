@@ -1,3 +1,5 @@
+[![Build Status](https://semaphoreci.com/api/v1/syfgkjasdkn/purchasebot/branches/master/shields_badge.svg)](https://semaphoreci.com/syfgkjasdkn/purchasebot)
+
 ## Build
 
 1. Install [docker](https://docs.docker.com/install/)
