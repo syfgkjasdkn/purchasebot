@@ -7,8 +7,8 @@ defmodule TGBot.NadiaAdapter do
   end
 
   @impl true
-  def set_webhook(url) do
-    Nadia.set_webhook(url: url)
+  def set_webhook(opts) do
+    Nadia.set_webhook(opts)
   end
 
   @impl true
