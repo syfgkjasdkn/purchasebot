@@ -13,7 +13,7 @@ defmodule TGBot.TestAdapter do
   end
 
   @impl true
-  def bot_id do
-    123
+  def bot_info do
+    %{id: 123, username: "some_bot"}
   end
 end

@@ -15,7 +15,15 @@ defmodule TGBot do
         }
       }) do
     if new_chat_member_id == bot_id() and Core.admin?(from_id) do
-      Core.add_group(chat_id)
+      case Core.add_group(chat_id) do
+        {:ok, _} ->
+          @adapter.send_message(chat_id, """
+          👍 Bot has been initialized!
+          """)
+
+        _ ->
+          :ignore
+      end
     end
   end
 
@@ -45,13 +53,21 @@ defmodule TGBot do
   end
 
   defp handle_public_text("/message " <> message, chat_id) do
-    :ok = Core.set_message(chat_id, message)
+    case Core.set_message(chat_id, message) do
+      :ok ->
+        @adapter.send_message(chat_id, """
+        👍 Saved the following message for the current group:
 
-    @adapter.send_message(chat_id, """
-    👍 Saved the following message for the current group:
+        #{message}
+        """)
 
-    #{message}
-    """)
+      {:error, :invalid_group} ->
+        @adapter.send_message(chat_id, """
+        🚨 The bot isn't started in this group.
+
+        Use /start@#{} to initialize it here.
+        """)
+    end
   end
 
   defp handle_public_text("/time", chat_id) do
@@ -92,6 +108,27 @@ defmodule TGBot do
         @adapter.send_message(chat_id, """
         🚨 Couldn't parse the schedule
         """)
+
+      {:error, :invalid_group} ->
+        @adapter.send_message(chat_id, """
+        🚨 The bot isn't started in this group.
+
+        Use /start@#{} to initialize it here.
+        """)
+    end
+  end
+
+  defp handle_public_text("/start@" <> bot_username, chat_id) do
+    if bot_username == bot_username() do
+      case Core.add_group(chat_id) do
+        {:ok, _} ->
+          @adapter.send_message(chat_id, """
+          👍 Bot has been initialized!
+          """)
+
+        _ ->
+          :ignore
+      end
     end
   end
 
@@ -113,9 +150,21 @@ defmodule TGBot do
     if bot_id = Application.get_env(:tgbot, :bot_id) do
       bot_id
     else
-      bot_id = @adapter.bot_id()
+      %{id: bot_id, username: bot_username} = @adapter.bot_info()
       Application.put_env(:tgbot, :bot_id, bot_id)
+      Application.put_env(:tgbot, :bot_username, bot_username)
       bot_id
+    end
+  end
+
+  def bot_username do
+    if bot_username = Application.get_env(:tgbot, :bot_username) do
+      bot_username
+    else
+      %{id: bot_id, username: bot_username} = @adapter.bot_info()
+      Application.put_env(:tgbot, :bot_id, bot_id)
+      Application.put_env(:tgbot, :bot_username, bot_username)
+      bot_username
     end
   end
 

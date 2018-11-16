@@ -12,9 +12,9 @@ defmodule TGBot.NadiaAdapter do
   end
 
   @impl true
-  def bot_id do
-    {:ok, %Nadia.Model.User{id: bot_id}} = Nadia.get_me()
+  def bot_info do
+    {:ok, %Nadia.Model.User{id: bot_id, username: bot_name}} = Nadia.get_me()
 
-    bot_id
+    %{id: bot_id, username: bot_name}
   end
 end

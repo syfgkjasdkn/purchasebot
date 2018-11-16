@@ -43,5 +43,7 @@ defmodule Core do
     group_id
     |> Group.via()
     |> GenServer.call(message)
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_group}
   end
 end
