@@ -65,7 +65,7 @@ defmodule TGBot do
         @adapter.send_message(chat_id, """
         🚨 The bot isn't started in this group.
 
-        Use /start@#{} to initialize it here.
+        Use /start@#{bot_username} to initialize it here.
         """)
     end
   end
@@ -113,7 +113,7 @@ defmodule TGBot do
         @adapter.send_message(chat_id, """
         🚨 The bot isn't started in this group.
 
-        Use /start@#{} to initialize it here.
+        Use /start@#{bot_username} to initialize it here.
         """)
     end
   end
