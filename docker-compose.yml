@@ -7,13 +7,13 @@ services:
     expose:
       - "4000"
     ports:
-      - "4000:4000"
+      - "443:4000"
     volumes:
        - purchasebot_data:/opt/app/data
     environment:
       - ADMIN_IDS=<...>
       - TG_TOKEN=<...>
-      - WEB_PORT=4000
+      - WEB_PORT=443
       - PUBLIC_IP=8.8.8.8
       - DB_PATH=/opt/app/data/db.sqlite3
 volumes:

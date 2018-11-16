@@ -29,9 +29,9 @@ defmodule Web.Application do
     # TODO simplify
     if unquote(Mix.env() == :prod) do
       if public_ip = Application.get_env(:web, :public_ip) do
-        port = :ranch.get_port(Web.Router) || raise("failed to get https port")
+        port = :ranch.get_port(Web.Router.HTTPS) || raise("failed to get https port")
         url = "https://#{public_ip}:#{port}/tgbot"
-        {:ok, _} = TGBot.set_webhook(url)
+        :ok = TGBot.set_webhook(url)
         Logger.info("set webhook to #{url}")
       else
         Logger.error("couldn't find web.public_ip env var, skipping webhook setup")
