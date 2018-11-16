@@ -1,6 +1,6 @@
 version: "3"
 services:
-  dicebot:
+  purchasebot:
     restart: always
     # image: <point to the image (instead of the next line)>
     build: .
