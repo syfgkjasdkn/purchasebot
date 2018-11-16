@@ -37,9 +37,6 @@ defmodule TGBot do
           "chat" => %{"type" => "private"}
         }
       }) do
-    # if Core.admin?(telegram_id) do
-    #   handle_private_text(text, telegram_id)
-    # end
     :ignore
   end
 
@@ -48,13 +45,7 @@ defmodule TGBot do
   end
 
   defp handle_public_text("/message " <> message, chat_id) do
-    # :ok = Core.start_message(chat_id)
-
     :ok = Core.set_message(chat_id, message)
-
-    # @adapter.send_message(chat_id, """
-    # 👍 Started a new message editing session for the current group.
-    # """)
 
     @adapter.send_message(chat_id, """
     👍 Saved the following message for the current group:
@@ -62,16 +53,6 @@ defmodule TGBot do
     #{message}
     """)
   end
-
-  # defp handle_public_text("/save", chat_id) do
-  #   {:ok, message} = Core.save_message(chat_id)
-
-  #   @adapter.send_message(chat_id, """
-  #   👍 Saved the following message for the current group:
-
-  #   #{message}
-  #   """)
-  # end
 
   defp handle_public_text("/time", chat_id) do
     @adapter.send_message(chat_id, """
@@ -115,17 +96,12 @@ defmodule TGBot do
   end
 
   defp handle_public_text(_text, _chat_id) do
-    # :ok = Core.handle_text(chat_id, text)
     :ignore
   end
 
-  # @token Application.get_env(:tgbot, :token) || raise(":tgbot needs :token")
-  # Application.get_env(:tgbot, :token) || raise(":tgbot needs :token")
-
   @spec token :: String.t()
   def token do
-    # @token
-    Application.get_env(:tgbot, :token)
+    Application.get_env(:nadia, :token)
   end
 
   @doc false

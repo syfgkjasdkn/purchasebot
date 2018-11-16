@@ -18,12 +18,12 @@ With that in mind, a possible command to run a container is:
 ```sh
 docker run purchasebot \
   -name purchasebot \
-  -v purchasebot.sqlite3:/opt/app/db.sqlite3 \
+  -v purchasebot_data:/opt/app/data \
   -e ADMIN_IDS=1726345,1723654,2435 \
   -e TG_TOKEN=17623456:euygafkjsdhfasdf \
   -e WEB_PORT=51762 \
   -e PUBLIC_IP=8.8.8.8 \
-  -e DB_PATH=/opt/app/db.sqlite3 \
+  -e DB_PATH=/opt/app/data/db.sqlite3 \
   -p 51762:51762
 ```
 

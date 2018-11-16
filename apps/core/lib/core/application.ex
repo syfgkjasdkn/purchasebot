@@ -10,9 +10,7 @@ defmodule Core.Application do
     end
 
   def start(_type, _args) do
-    load_admins!()
-    load_db_path!()
-
+    # TODO simplify
     children =
       Enum.reject(
         [
@@ -32,29 +30,7 @@ defmodule Core.Application do
 
   @doc false
   def db_path! do
-    Application.get_env(:core, :db_path) || raise("need db path")
-  end
-
-  @doc false
-  def load_admins! do
-    admins =
-      (System.get_env("ADMIN_IDS") || raise(ArgumentError, "need ADMIN_IDS to be set"))
-      |> String.split(",", trim: true)
-      |> Enum.map(fn admin_id ->
-        try do
-          String.to_integer(admin_id)
-        rescue
-          _ ->
-            raise(ArgumentError, "couldn't parse ADMIN_IDS as integers")
-        end
-      end)
-
-    Application.put_env(:core, :admins, admins)
-  end
-
-  def load_db_path! do
-    db_path = System.get_env("DB_PATH") || raise(ArgumentError, "need DB_PATH to be set")
-    Application.put_env(:core, :db_path, db_path)
+    Application.get_env(:core, :db_path) || raise("need core.db_path")
   end
 
   def start_groups do

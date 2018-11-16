@@ -1,53 +1,64 @@
 defmodule Web.Plugs.TGBotTest do
-  use Web.ConnCase
+  use ExUnit.Case
+  use Plug.Test
+
+  @opts Web.Router.init([])
 
   setup do
     {:ok, _pid} = Storage.start_link(path: ":memory:", name: Storage)
     :ok
   end
 
-  test "invalid token", %{conn: conn} do
-    conn = post(conn, "/tgbot/aksdjhfg")
+  test "invalid token" do
+    conn = Web.Router.call(conn(:post, "/tgbot/aksdjhfg"), @opts)
     assert conn.status == 200
     assert_receive(:invalid_token)
     refute_receive {:message, _telegram_id, _text}
   end
 
-  test "no token", %{conn: conn} do
-    conn = post(conn, "/tgbot")
+  test "no token" do
+    conn = Web.Router.call(conn(:post, "/tgbot"), @opts)
     assert conn.status == 200
     assert_receive(:invalid_token)
     refute_receive {:message, _telegram_id, _text}
   end
 
-  test "valid token", %{conn: conn} do
+  test "valid token" do
     conn =
-      post(conn, "/tgbot/#{TGBot.token()}", %{
-        "message" => %{
-          "text" => "/help",
-          "from" => %{"id" => 123},
-          "chat" => %{"id" => 123, "type" => "private"}
-        }
-      })
+      Web.Router.call(
+        conn(:post, "/tgbot/#{TGBot.token()}", %{
+          "message" => %{
+            "text" => "/time",
+            "from" => %{"id" => 1},
+            "chat" => %{"id" => -123, "type" => "supergroup"}
+          }
+        }),
+        @opts
+      )
 
     assert conn.status == 200
 
     assert_receive {:message,
-                    telegram_id: 123,
+                    telegram_id: -123,
                     text: """
-                    /bet <amount> to play
+                    Provide the minutes at hours (UTC) when the message needs to be reposted.
+                    Format: /time <hours> <minutes>
 
-                    /trade to get SatBet
+                    Example:
 
-                    /freeroll to roll for free
+                    /time 0,6,12,18 0
 
-                    /balance to check your balance
+                    Would repost the message at:
 
-                    /key to see your private key
+                    00:00
+                    06:00
+                    12:00
+                    18:00
 
-                    /address to see your TRON address
+                    Other valid examples:
 
-                    /help to get this message
+                    /time 0 0
+                    /time 0,12 0,30
                     """}
   end
 end

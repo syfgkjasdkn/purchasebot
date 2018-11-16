@@ -16,6 +16,13 @@ publisher =
     env when env in [:prod, :dev] -> TGBot.NadiaAdapter
   end
 
+admin_ids =
+  case Mix.env() do
+    :test -> [1]
+    env when env in [:prod, :dev] -> nil
+  end
+
 config :core,
   db_path: db_path,
-  publisher: publisher
+  publisher: publisher,
+  admin_ids: admin_ids

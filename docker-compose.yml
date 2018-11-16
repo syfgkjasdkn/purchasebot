@@ -9,12 +9,12 @@ services:
     ports:
       - "4000:4000"
     volumes:
-       - purchasebot.sqlite3:/opt/app/db.sqlite3
+       - purchasebot_data:/opt/app/data
     environment:
       - ADMIN_IDS=<...>
       - TG_TOKEN=<...>
       - WEB_PORT=4000
       - PUBLIC_IP=8.8.8.8
-      - DB_PATH=/opt/app/db.sqlite3
+      - DB_PATH=/opt/app/data/db.sqlite3
 volumes:
-  purchasebot.sqlite3:
+  purchasebot_data:

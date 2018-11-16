@@ -4,10 +4,19 @@ defmodule Web.Application do
   require Logger
 
   def start(_type, _args) do
-    import Supervisor.Spec
+    port = Application.get_env(:web, :port) || raise("need web.port")
 
     children = [
-      supervisor(Web.Endpoint, []),
+      Plug.Cowboy.child_spec(
+        scheme: :https,
+        plug: Web.Router,
+        options: [
+          port: port,
+          otp_app: :web,
+          keyfile: "priv/server.key",
+          certfile: "priv/server.pem"
+        ]
+      ),
       {Task, fn -> maybe_set_webhook() end}
     ]
 
@@ -15,22 +24,18 @@ defmodule Web.Application do
     Supervisor.start_link(children, opts)
   end
 
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
-  def config_change(changed, _new, removed) do
-    Web.Endpoint.config_change(changed, removed)
-    :ok
-  end
-
   @doc false
   def maybe_set_webhook do
-    if public_ip = System.get_env("PUBLIC_IP") do
-      port = :ranch.get_port(Web.Endpoint.HTTPS) || raise("failed to get https port")
-      url = "https://#{public_ip}:#{port}/tgbot"
-      {:ok, _} = TGBot.set_webhook(url)
-      Logger.info("set webhook to #{url}")
-    else
-      Logger.error("couldn't find PUBLIC_IP env var, skipping webhook setup")
+    # TODO simplify
+    if unquote(Mix.env() == :prod) do
+      if public_ip = Application.get_env(:web, :public_ip) do
+        port = :ranch.get_port(Web.Router) || raise("failed to get https port")
+        url = "https://#{public_ip}:#{port}/tgbot"
+        {:ok, _} = TGBot.set_webhook(url)
+        Logger.info("set webhook to #{url}")
+      else
+        Logger.error("couldn't find web.public_ip env var, skipping webhook setup")
+      end
     end
   end
 end

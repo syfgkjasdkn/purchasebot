@@ -24,7 +24,6 @@ token =
   end
 
 config :tgbot,
-  token: token,
   adapter: adapter
 
 config :nadia,

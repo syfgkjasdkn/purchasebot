@@ -10,8 +10,6 @@ defmodule Web.Mixfile do
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
       elixir: "~> 1.7",
-      elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -27,24 +25,15 @@ defmodule Web.Mixfile do
     ]
   end
 
-  # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_env), do: ["lib"]
-
   # Specifies your project dependencies.
   #
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.4-rc"},
-      {:phoenix_pubsub, "~> 1.0"},
-      {:phoenix_html, "~> 2.10"},
-      {:phoenix_live_reload, "~> 1.2-rc", only: :dev},
-      {:gettext, "~> 0.11"},
+      {:plug, "~> 1.7"},
       {:cowboy, "~> 2.0"},
       {:tgbot, in_umbrella: true},
       {:jason, "~> 1.1"},
-      {:httpoison, "~> 1.3", only: :test, override: true},
       {:plug_cowboy, "~> 2.0"}
     ]
   end

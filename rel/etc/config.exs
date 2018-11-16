@@ -5,22 +5,30 @@ env! = fn var, type ->
 
   try do
     case type do
-      :string -> val
-      :integer -> String.to_integer(val)
+      :string ->
+        val
+
+      :integer ->
+        String.to_integer(val)
+
+      {:list, :integer} ->
+        val
+        |> :binary.split(",", [:global])
+        |> Enum.map(&String.to_integer/1)
     end
   rescue
     _error ->
-      raise(ArgumentError, "couldn't parse #{val} as #{type}")
+      raise(ArgumentError, "couldn't parse #{val} as #{inspect(type)}")
   end
 end
 
-config :core,
-  db_path: env!.("DB_PATH", :string)
+config :nadia,
+  token: env!.("TG_TOKEN", :string)
 
-config :web, Web.Endpoint,
-  https: [
-    :inet6,
-    port: env!.("WEB_PORT", :integer),
-    keyfile: "priv/server.key",
-    certfile: "priv/server.pem"
-  ]
+config :core,
+  db_path: env!.("DB_PATH", :string),
+  admin_ids: env!.("ADMIN_IDS", {:list, :integer})
+
+config :web,
+  public_ip: env!.("PUBLIC_IP", :string),
+  port: env!.("WEB_PORT", :integer)

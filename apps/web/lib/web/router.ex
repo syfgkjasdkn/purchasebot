@@ -1,27 +1,15 @@
 defmodule Web.Router do
-  use Web, :router
+  @moduledoc false
+  use Plug.Router
 
-  # pipeline :browser do
-  #   plug :accepts, ["html"]
-  #   plug :fetch_session
-  #   plug :fetch_flash
-  #   plug :protect_from_forgery
-  #   plug :put_secure_browser_headers
-  # end
+  plug(Plug.Logger)
+  plug(:match)
+  plug(Plug.Parsers, parsers: [:json], pass: ["application/json"], json_decoder: Jason)
+  plug(:dispatch)
 
-  pipeline :api do
-    plug(:accepts, ["json"])
-  end
+  forward("/tgbot", to: Web.Plugs.TGBot)
 
-  # scope "/", Web do
-  #   pipe_through :browser # Use the default browser stack
-
-  #   get "/", PageController, :index
-  # end
-
-  scope "/", Web.Plugs do
-    pipe_through(:api)
-
-    forward("/tgbot", TGBot)
+  match _ do
+    send_resp(conn, 404, [])
   end
 end
