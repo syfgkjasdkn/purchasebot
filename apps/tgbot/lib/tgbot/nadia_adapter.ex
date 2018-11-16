@@ -8,7 +8,7 @@ defmodule TGBot.NadiaAdapter do
 
   @impl true
   def set_webhook(opts) do
-    Nadia.set_webhook(opts)
+    Nadia.API.request("setWebhook", opts, :certificate)
   end
 
   @impl true
