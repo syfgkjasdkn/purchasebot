@@ -5,15 +5,15 @@ services:
     # image: <point to the image (instead of the next line)>
     build: .
     expose:
-      - "4000"
+      - "8443"
     ports:
-      - "443:4000"
+      - "8443:8443"
     volumes:
        - purchasebot_data:/opt/app/data
     environment:
       - ADMIN_IDS=<...>
       - TG_TOKEN=<...>
-      - WEB_PORT=443
+      - WEB_PORT=8443
       - PUBLIC_IP=8.8.8.8
       - DB_PATH=/opt/app/data/db.sqlite3
 volumes:
