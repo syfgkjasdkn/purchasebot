@@ -27,7 +27,7 @@ defmodule Core.Schedule do
     {min, max} =
       case type do
         :hours -> {0, 24}
-        :minutes -> {0, 59}
+        :minutes -> {0, 60}
       end
 
     hours_or_minutes =
