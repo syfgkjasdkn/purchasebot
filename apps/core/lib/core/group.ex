@@ -31,19 +31,6 @@ defmodule Core.Group do
   @doc false
   def handle_call(message, from, state)
 
-  # def handle_call({:handle_text, text}, _from, state(message_acc: message_acc) = state) do
-  #   {:reply, :ok, state(state, message_acc: [message_acc | text])}
-  # end
-
-  # def handle_call(:start_message, _from, state) do
-  #   {:reply, :ok, state(state, message_acc: [])}
-  # end
-
-  # def handle_call(:save_message, _from, state(group_id: group_id, message_acc: message) = state) do
-  #   :ok = Storage.set_message(group_id, message)
-  #   {:reply, {:ok, message}, state(state, message_acc: [])}
-  # end
-
   def handle_call(
         {:set_schedule, raw_schedule},
         _from,
