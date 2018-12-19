@@ -26,7 +26,8 @@ defmodule Core.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:_storage, in_umbrella: true}
+      {:_storage, in_umbrella: true},
+      {:rexbug, "~> 1.0"}
     ]
   end
 end
