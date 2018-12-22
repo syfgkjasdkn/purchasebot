@@ -3,7 +3,7 @@ defmodule TGBot.NadiaAdapter do
 
   @impl true
   def send_message(telegram_id, text) do
-    Nadia.send_message(telegram_id, text, parse_mode: "Markdown")
+    Nadia.send_message(telegram_id, text)
   end
 
   @impl true
